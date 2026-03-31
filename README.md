@@ -1,0 +1,2 @@
+# bsod
+basically simulates bsod
