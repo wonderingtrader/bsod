@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BSOD</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background-color: #0000AA;
+            color: #FFFFFF;
+            font-family: 'Courier New', 'Lucida Sans Typewriter', monospace;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+        .bsod-container {
+            padding: 20px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .content {
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        .sad-face {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        .message {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .progress {
+            font-size: 18px;
+            margin: 30px 0;
+        }
+        .qr-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .stop-code {
+            margin-top: 30px;
+            font-size: 16px;
+        }
+        .link {
+            margin: 20px 0;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .spinner {
+            display: inline-block;
+            animation: spin 0.5s linear infinite;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="bsod-container">
+        <div class="content">
+            <div class="sad-face">:(</div>
+            <div class="message">
+                Your PC ran into a problem and needs to restart. We're<br>
+                just collecting some error info, and then we'll restart<br>
+                for you.
+            </div>
+            <div class="progress">
+                <span id="progressValue">0</span>% complete
+                <span id="spinner" class="spinner">|</span>
+            </div>
+            <div id="qrSection" class="hidden">
+                <div class="qr-container" id="qrCode"></div>
+            </div>
+            <div id="linkSection">
+                <div class="link">
+                    For more information about this issue and possible<br>
+                    fixes, visit https://windows.com/stopcode
+                </div>
+            </div>
+            <div class="stop-code">
+                If you call a support person, give them this info:<br>
+                Stop code: CRITICAL_PROCESS_DIED
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs2-fix/qrcode.min.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const showQR = urlParams.has('qrcode');
+        const qrSection = document.getElementById('qrSection');
+        const linkSection = document.getElementById('linkSection');
+        let progress = 0;
+        let spinnerFrames = ['\\', '|', '/', '-'];
+        let frameIndex = 0;
+        const progressSpan = document.getElementById('progressValue');
+        const spinnerSpan = document.getElementById('spinner');
+        
+        if (showQR) {
+            qrSection.classList.remove('hidden');
+            linkSection.classList.add('hidden');
+            new QRCode(document.getElementById('qrCode'), {
+                text: 'https://windows.com/stopcode',
+                width: 200,
+                height: 200,
+                colorDark: '#FFFFFF',
+                colorLight: '#0000AA',
+                correctLevel: QRCode.CorrectLevel.M
+            });
+        }
+        
+        const interval = setInterval(() => {
+            if (progress <= 100) {
+                progressSpan.textContent = progress;
+                spinnerSpan.textContent = spinnerFrames[frameIndex % spinnerFrames.length];
+                frameIndex++;
+                progress++;
+            } else {
+                clearInterval(interval);
+                spinnerSpan.style.display = 'none';
+                setTimeout(() => {
+                    document.body.style.backgroundColor = '#0000AA';
+                    document.body.innerHTML = '<div class="bsod-container"><div class="content"><div class="sad-face">:(</div><div class="message">Your PC ran into a problem and needs to restart.<br>We\'re just collecting some error info, and then we\'ll restart<br>for you.</div><div class="progress">100% complete</div><div class="stop-code">Stop code: CRITICAL_PROCESS_DIED</div></div></div>';
+                }, 2000);
+            }
+        }, 50);
+    </script>
+</body>
+</html>
